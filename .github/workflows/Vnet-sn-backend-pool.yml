@@ -44,18 +44,18 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Create Virtual Network and Subnet (if not exist)
+      - name: Create Virtual Network and Subnet
         if: inputs.action == 'add'
         run: |
           az network vnet create --resource-group ${{ inputs.resource-group }} \
-          --name ${{ inputs.vnet-name }} --address-prefix 10.0.0.0/16 \
-          --subnet-name ${{ inputs.subnet-name }} --subnet-prefix 10.0.1.0/24 --location "${{ inputs.location }}"
+            --name ${{ inputs.vnet-name }} --address-prefix 10.0.0.0/16 \
+            --subnet-name ${{ inputs.subnet-name }} --subnet-prefix 10.0.1.0/24 --location "${{ inputs.location }}"
 
       - name: Create Network Interface
         if: inputs.action == 'add'
         run: |
           az network nic create --resource-group ${{ inputs.resource-group }} --name ${{ inputs.nic-name }} \
-          --vnet-name ${{ inputs.vnet-name }} --subnet ${{ inputs.subnet-name }} --location "${{ inputs.location }}"
+            --vnet-name ${{ inputs.vnet-name }} --subnet ${{ inputs.subnet-name }} --location "${{ inputs.location }}"
 
       - name: Get NIC ID
         if: inputs.action == 'add'
