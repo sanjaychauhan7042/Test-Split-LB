@@ -25,12 +25,15 @@ on:
       vnet-name:
         description: 'Virtual Network Name'
         required: false
+        default: 'MyVnet'
       subnet-name:
         description: 'Subnet Name'
         required: false
+        default: 'MySubnet'
       location:
         description: 'Azure Region'
         required: false
+        default: 'East US'
 
 jobs:
   manage-backend-pool:
