@@ -21,7 +21,8 @@ on:
         required: true
       nic-name:
         description: 'Network Interface Name'
-        required: false
+        required: true
+        default: 'MyNic'
       vnet-name:
         description: 'Virtual Network Name'
         required: false
