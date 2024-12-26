@@ -4,6 +4,24 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform (Add, Modify, Remove)'
+        required: true
+        default: 'Add'
+        options:
+          - Add
+          - Modify
+          - Remove
+      environment:
+        description: 'Environment (Dev, Prod, UAT)'
+        required: true
+        type: choice
+        options:
+          - Dev
+          - Prod
+          - UAT
 
 jobs:
   deploy:
@@ -22,18 +40,34 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Setup Environment
-        run: echo "Preparing for deployment to dev environment"
+        run: echo "Preparing for deployment to ${{ github.event.inputs.environment }} environment"
 
       - name: Add Resource
         if: ${{ github.event.inputs.action == 'Add' }}
-        run: echo "Adding resource to dev environment"
+        run: echo "Adding resource to ${{ github.event.inputs.environment }} environment"
 
       - name: Modify Resource
         if: ${{ github.event.inputs.action == 'Modify' }}
-        run: echo "Modifying resource in dev environment"
+        run: echo "Modifying resource in ${{ github.event.inputs.environment }} environment"
 
       - name: Remove Resource
         if: ${{ github.event.inputs.action == 'Remove' }}
         run: |
           echo "Requesting approval for resource removal..."
           exit 1  # Ensure the workflow exits and waits for approval
+
+  dev-remove:
+    runs-on: ubuntu-latest
+
+    if: ${{ github.event.inputs.environment == 'Dev' && github.event.inputs.action == 'Remove' }}
+
+    environment:
+      name: Dev
+      url: https://your-dev-environment-url.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Remove Resources
+        run: echo "Removing resources from Dev"
