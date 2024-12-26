@@ -1,1 +1,79 @@
+name: Manage Backend Pool with NIC Creation
 
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Add or Remove NIC from Backend Pool'
+        required: true
+        default: 'add'
+        options:
+          - add
+          - remove
+      resource-group:
+        description: 'Azure Resource Group'
+        required: true
+      lb-name:
+        description: 'Load Balancer Name'
+        required: true
+      backend-pool-name:
+        description: 'Backend Pool Name'
+        required: true
+      nic-name:
+        description: 'Network Interface Name'
+        required: false
+      vnet-name:
+        description: 'Virtual Network Name'
+        required: false
+      subnet-name:
+        description: 'Subnet Name'
+        required: false
+      location:
+        description: 'Azure Region'
+        required: false
+
+jobs:
+  manage-backend-pool:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Create Virtual Network and Subnet (if not exist)
+        if: inputs.action == 'add'
+        run: |
+          az network vnet create --resource-group ${{ inputs.resource-group }} \
+          --name ${{ inputs.vnet-name }} --address-prefix 10.0.0.0/16 \
+          --subnet-name ${{ inputs.subnet-name }} --subnet-prefix 10.0.1.0/24 --location "${{ inputs.location }}"
+
+      - name: Create Network Interface
+        if: inputs.action == 'add'
+        run: |
+          az network nic create --resource-group ${{ inputs.resource-group }} --name ${{ inputs.nic-name }} \
+          --vnet-name ${{ inputs.vnet-name }} --subnet ${{ inputs.subnet-name }} --location "${{ inputs.location }}"
+
+      - name: Get NIC ID
+        if: inputs.action == 'add'
+        id: get-nic-id
+        run: |
+          NIC_ID=$(az network nic show --resource-group ${{ inputs.resource-group }} --name ${{ inputs.nic-name }} --query "id" -o tsv)
+          echo "NIC_ID=$NIC_ID" >> $GITHUB_ENV
+
+      - name: Add NIC to Backend Pool
+        if: inputs.action == 'add'
+        run: |
+          az network lb address-pool address add --resource-group ${{ inputs.resource-group }} \
+            --lb-name ${{ inputs.lb-name }} --pool-name ${{ inputs.backend-pool-name }} \
+            --nic ${{ env.NIC_ID }}
+
+      - name: Remove NIC from Backend Pool
+        if: inputs.action == 'remove'
+        run: |
+          az network lb address-pool address remove --resource-group ${{ inputs.resource-group }} \
+            --lb-name ${{ inputs.lb-name }} --pool-name ${{ inputs.backend-pool-name }} \
+            --nic ${{ inputs.nic-id }}
