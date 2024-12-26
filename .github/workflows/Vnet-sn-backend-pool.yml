@@ -72,6 +72,12 @@ jobs:
           NIC_ID=$(az network nic show --resource-group ${{ inputs.resource-group }} --name ${{ inputs.nic-name }} --query "id" -o tsv)
           echo "NIC_ID=$NIC_ID" >> $GITHUB_ENV
 
+      - name: Create Backend Address Pool
+        if: inputs.action == 'add'
+        run: |
+          az network lb address-pool create --resource-group ${{ inputs.resource-group }} \
+            --lb-name ${{ inputs.lb-name }} --name ${{ inputs.backend-pool-name }}
+
       - name: Add NIC to Backend Pool
         if: inputs.action == 'add'
         run: |
