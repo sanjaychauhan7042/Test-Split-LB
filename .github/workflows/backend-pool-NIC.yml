@@ -1,4 +1,4 @@
-name: Manage Backend Pool with NIC Creation
+name: Manage Backend Pool with NIC
 
 on:
   workflow_dispatch:
