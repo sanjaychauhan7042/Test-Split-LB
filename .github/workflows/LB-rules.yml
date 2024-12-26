@@ -1,0 +1,64 @@
+name: Manage LB Rules
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Add, Update, or Remove LB Rules'
+        required: true
+        default: 'add'
+        options:
+          - add
+          - update
+          - remove
+      resource-group:
+        description: 'Azure Resource Group'
+        required: true
+      lb-name:
+        description: 'Load Balancer Name'
+        required: true
+      rule-name:
+        description: 'Rule Name'
+        required: true
+      frontend-ip:
+        description: 'Frontend IP Configuration Name'
+        required: true
+      backend-pool-name:
+        description: 'Backend Pool Name'
+        required: true
+      protocol:
+        description: 'Protocol (TCP/UDP)'
+        required: true
+      frontend-port:
+        description: 'Frontend Port'
+        required: true
+      backend-port:
+        description: 'Backend Port'
+        required: true
+
+jobs:
+  manage-lb-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Add or Update LB Rule
+        if: inputs.action == 'add' || inputs.action == 'update'
+        run: |
+          az network lb rule create --resource-group ${{ inputs.resource-group }} \
+            --lb-name ${{ inputs.lb-name }} --name ${{ inputs.rule-name }} \
+            --protocol ${{ inputs.protocol }} --frontend-port ${{ inputs.frontend-port }} \
+            --backend-port ${{ inputs.backend-port }} --frontend-ip-name ${{ inputs.frontend-ip }} \
+            --backend-pool-name ${{ inputs.backend-pool-name }}
+
+      - name: Remove LB Rule
+        if: inputs.action == 'remove'
+        run: |
+          az network lb rule delete --resource-group ${{ inputs.resource-group }} \
+            --lb-name ${{ inputs.lb-name }} --name ${{ inputs.rule-name }}
