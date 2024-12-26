@@ -1,0 +1,50 @@
+name: Manage Backend Pool
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Add or Remove NIC from Backend Pool'
+        required: true
+        default: 'add'
+        options:
+          - add
+          - remove
+      resource-group:
+        description: 'Azure Resource Group'
+        required: true
+      lb-name:
+        description: 'Load Balancer Name'
+        required: true
+      backend-pool-name:
+        description: 'Backend Pool Name'
+        required: true
+      nic-id:
+        description: 'Network Interface ID'
+        required: true
+
+jobs:
+  manage-backend-pool:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Add NIC to Backend Pool
+        if: inputs.action == 'add'
+        run: |
+          az network lb address-pool address add --resource-group ${{ inputs.resource-group }} \
+            --lb-name ${{ inputs.lb-name }} --pool-name ${{ inputs.backend-pool-name }} \
+            --nic ${{ inputs.nic-id }}
+
+      - name: Remove NIC from Backend Pool
+        if: inputs.action == 'remove'
+        run: |
+          az network lb address-pool address remove --resource-group ${{ inputs.resource-group }} \
+            --lb-name ${{ inputs.lb-name }} --pool-name ${{ inputs.backend-pool-name }} \
+            --nic ${{ inputs.nic-id }}
