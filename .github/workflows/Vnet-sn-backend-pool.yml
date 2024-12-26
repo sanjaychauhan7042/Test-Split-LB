@@ -35,6 +35,10 @@ on:
         description: 'Azure Region'
         required: false
         default: 'East US'
+      ip-address:
+        description: 'IP Address for the NIC'
+        required: true
+        default: '10.0.0.4'
 
 jobs:
   manage-backend-pool:
@@ -73,7 +77,7 @@ jobs:
         run: |
           az network lb address-pool address add --resource-group ${{ inputs.resource-group }} \
             --lb-name ${{ inputs.lb-name }} --pool-name ${{ inputs.backend-pool-name }} \
-            --nic ${{ env.NIC_ID }}
+            --name ${{ inputs.nic-name }} --ip-address ${{ inputs.ip-address }}
 
       - name: Remove NIC from Backend Pool
         if: inputs.action == 'remove'
