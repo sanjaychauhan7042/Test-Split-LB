@@ -25,11 +25,11 @@ on:
         default: 'MyNic'
       vnet-name:
         description: 'Virtual Network Name'
-        required: false
+        required: true
         default: 'MyVnet'
       subnet-name:
         description: 'Subnet Name'
-        required: false
+        required: true
         default: 'MySubnet'
       location:
         description: 'Azure Region'
@@ -77,7 +77,7 @@ jobs:
         run: |
           az network lb address-pool address add --resource-group ${{ inputs.resource-group }} \
             --lb-name ${{ inputs.lb-name }} --pool-name ${{ inputs.backend-pool-name }} \
-            --name ${{ inputs.nic-name }} --ip-address ${{ inputs.ip-address }}
+            --name ${{ inputs.nic-name }} --ip-address ${{ inputs.ip-address }} --vnet ${{ inputs.vnet-name }}
 
       - name: Remove NIC from Backend Pool
         if: inputs.action == 'remove'
