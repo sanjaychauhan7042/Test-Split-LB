@@ -5,6 +5,7 @@ on:
     inputs:
       action:
         description: 'Add, Update, or Remove Health Probes'
+        type: choice
         required: true
         default: 'add'
         options:
