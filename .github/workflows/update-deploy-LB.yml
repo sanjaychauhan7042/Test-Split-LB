@@ -43,24 +43,7 @@ on:
       lb_name:
         description: 'Load Balancer Name'
         required: true
-      frontend_ip:
-        description: 'Frontend IP Configuration Name'
-        required: true
-      resource_group_purpose:
-        description: 'Resource Group and Purpose'
-        required: true
-      subnetname_nicnames:
-        description: 'Subnet name and NIC names (comma-separated)'
-        required: true
-      private_ip_and_probe:
-        description: 'Private IP address, Probe protocol, Probe port (comma-separated)'
-        required: true
-      tcp_rules:
-        description: 'TCP rule protocol, frontend port, backend port (comma-separated)'
-        required: true
-      https_rules:
-        description: 'HTTPS rule protocol, frontend port (comma-separated)'
-        required: true
+      
 
 jobs:
   deploy-lb:
