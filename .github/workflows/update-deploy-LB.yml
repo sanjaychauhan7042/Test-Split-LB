@@ -10,99 +10,57 @@ on:
         options:
           - create
           - remove
-      requesttype:
+      requesttype_environment:
         type: choice
         required: true
-        description: Request Type
+        description: 'Request Type and Environment'
         options:
-          - Create (with New RG)
-          - Create (with Existing RG)
-          - Remove
-        default: 'Create (with New RG)'
-      environment:
+          - Create New RG in DEV
+          - Create New RG in UAT
+          - Create New RG in QA
+          - Create New RG in PROD
+          - Create Existing RG in DEV
+          - Create Existing RG in UAT
+          - Create Existing RG in QA
+          - Create Existing RG in PROD
+          - Remove in DEV
+          - Remove in UAT
+          - Remove in QA
+          - Remove in PROD
+      location_sku:
         type: choice
         required: true
-        description: Environment
+        description: 'Deployment Location and SKU'
         options:
-          - DEV
-          - UAT
-          - QA
-          - PROD
-      resource-group:
-        description: 'Azure Resource Group'
-        required: true
-      location:
-        type: choice
-        required: true
-        description: Deployment Location
-        options:
-          - Select the location
-          - eastus2
-          - uksouth
-          - centralus
-          - ukwest
-      lb-name:
+          - eastus2 Standard
+          - uksouth Standard
+          - centralus Standard
+          - ukwest Standard
+          - eastus2 Basic
+          - uksouth Basic
+          - centralus Basic
+          - ukwest Basic
+      lb_name:
         description: 'Load Balancer Name'
         required: true
-      frontend-ip:
+      frontend_ip:
         description: 'Frontend IP Configuration Name'
         required: true
-      sku_name:
-        type: choice
-        required: false
-        description: SKU for Load Balancer
-        options:
-          - Standard
-          - Basic
-        default: 'Standard'
-      purpose:
-        type: string
+      resource_group_purpose:
+        description: 'Resource Group and Purpose'
         required: true
-        description: Purpose of the Load Balancer
-      purposeRG:
-        type: string
+      subnetname_nicnames:
+        description: 'Subnet name and NIC names (comma-separated)'
         required: true
-        description: Resource Group Purpose
-      subnetname:
-        type: string
+      private_ip_and_probe:
+        description: 'Private IP address, Probe protocol, Probe port (comma-separated)'
         required: true
-        description: Subnet name for Load Balancer
-      private_ip_address:
-        type: string
-        required: false
-        description: Private IP address for Load Balancer frontend configuration
-      nic_names:
-        description: 'Comma-separated list of NIC names'
+      tcp_rules:
+        description: 'TCP rule protocol, frontend port, backend port (comma-separated)'
         required: true
-        default: 'nic1,nic2,nic3'
-      lb_probe_protocol:
-        type: string
+      https_rules:
+        description: 'HTTPS rule protocol, frontend port (comma-separated)'
         required: true
-        description: Probe protocol for the Load Balancer
-      lb_probe_port:
-        type: string
-        required: true
-        description: Probe port for the Load Balancer
-      lb_rule_tcp_protocol:
-        type: string
-        required: true
-        description: TCP rule protocol for the Load Balancer
-      lb_rule_tcp_frontend_port:
-        type: string
-        required: true
-        description: TCP rule frontend port for the Load Balancer
-      lb_rule_tcp_backend_port:
-        type: string
-        required: true
-        description: TCP rule backend port for the Load Balancer
-      lb_rule_https_protocol:
-        type: string
-        required: true
-        description: HTTPS rule protocol for the Load Balancer
-      lb_rule_https_frontend_port:
-        type: string
-        required: true
-        description: HTTPS frontend port for the Load Balancer
 
 jobs:
   deploy-lb:
@@ -117,11 +75,11 @@ jobs:
       - name: Deploy Load Balancer
         if: ${{ inputs.action == 'create' }}
         run: |
-          az network lb create --resource-group ${{ inputs.resource-group }} \
-            --name ${{ inputs.lb-name }} --location "${{ inputs.location }}" \
-            --frontend-ip-name ${{ inputs.frontend-ip }}
+          az network lb create --resource-group ${{ inputs.resource_group_purpose.split(' ')[0] }} \
+            --name ${{ inputs.lb_name }} --location "${{ inputs.location_sku.split(' ')[0] }}" \
+            --frontend-ip-name ${{ inputs.frontend_ip }}
       - name: Remove Load Balancer
         if: ${{ inputs.action == 'remove' }}
         run: |
-          az network lb delete --resource-group ${{ inputs.resource-group }} \
-            --name ${{ inputs.lb-name }}
+          az network lb delete --resource-group ${{ inputs.resource_group_purpose.split(' ')[0] }} \
+            --name ${{ inputs.lb_name }}
