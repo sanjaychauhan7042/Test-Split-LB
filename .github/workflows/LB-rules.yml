@@ -5,6 +5,7 @@ on:
     inputs:
       action:
         description: 'Add, Update, or Remove LB Rules'
+        type: choice
         required: true
         default: 'add'
         options:
