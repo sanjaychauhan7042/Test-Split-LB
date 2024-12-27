@@ -5,6 +5,7 @@ on:
     inputs:
       action:
         description: 'Add or Remove NIC from Backend Pool'
+        type: choice
         required: true
         default: 'add'
         options:
