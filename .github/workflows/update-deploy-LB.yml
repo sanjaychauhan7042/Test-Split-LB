@@ -1,4 +1,5 @@
 name: create and remove Load Balancer
+
 on: 
   workflow_dispatch:
     inputs:
@@ -64,13 +65,19 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          creds: 
+            ARM_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }}
+            ARM_CLIENT_SECRET=${{ secrets.AZURE_CLIENT_SECRET }}
+            ARM_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}
+            ARM_SUBSCRIPTION_ID=${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
       - name: Deploy Load Balancer
         if: ${{ inputs.action == 'create' }}
         run: |
           az network lb create --resource-group ${{ inputs.resource_group }} \
             --name ${{ inputs.lb_name }} --location "${{ inputs.location }}" \
             --frontend-ip-name ${{ inputs.frontend_ip }}
+            
       - name: Remove Load Balancer
         if: ${{ inputs.action == 'remove' }}
         run: |
