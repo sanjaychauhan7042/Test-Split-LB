@@ -1,49 +1,126 @@
-name: Update Deploy Load Balancer
-
-on:
-  workflow_dispatch:
-    inputs:
-      action:
-        description: 'Create or Remove the Load Balancer'
-        required: true
-        default: 'create'
-        options:
-          - create
-          - remove
-      resource-group:
-        description: 'Azure Resource Group'
-        required: true
-      location:
-        description: 'Azure Region'
-        required: true
-      lb-name:
-        description: 'Load Balancer Name'
-        required: true
-      frontend-ip:
-        description: 'Frontend IP Configuration Name'
-        required: true
+name: create and remove Load Balancer
+on: workflow_dispatch:
+  inputs:
+    action:
+      description: 'Create or Remove the Load Balancer'
+      type: choice
+      required: true
+      default: 'create'
+      options:
+        - create
+        - remove
+    requesttype:
+      type: choice
+      required: true
+      description: Request Type
+      options:
+        - Create (with New RG)
+        - Create (with Existing RG)
+        - Remove
+      default: 'Create (with New RG)'
+    environment:
+      type: choice
+      required: true
+      description: Environment
+      options:
+        - DEV
+        - UAT
+        - QA
+        - PROD
+    resource-group:
+      description: 'Azure Resource Group'
+      required: true
+    location:
+      type: choice
+      required: true
+      description: Deployment Location
+      options:
+        - Select the location
+        - eastus2
+        - uksouth
+        - centralus
+        - ukwest
+    lb-name:
+      description: 'Load Balancer Name'
+      required: true
+    frontend-ip:
+      description: 'Frontend IP Configuration Name'
+      required: true
+    sku_name:
+      type: choice
+      required: false
+      description: SKU for Load Balancer
+      options:
+        - Standard
+        - Basic
+      default: 'Standard'
+    purpose:
+      type: string
+      required: true
+      description: Purpose of the Load Balancer
+    purposeRG:
+      type: string
+      required: true
+      description: Resource Group Purpose
+    subnetname:
+      type: string
+      required: true
+      description: Subnet name for Load Balancer
+    private_ip_address:
+      type: string
+      required: false
+      description: Private IP address for Load Balancer frontend configuration
+    nic_names:
+      description: 'Comma-separated list of NIC names'
+      required: true
+      default: 'nic1,nic2,nic3'
+    lb_probe_protocol:
+      type: string
+      required: true
+      description: Probe protocol for the Load Balancer
+    lb_probe_port:
+      type: string
+      required: true
+      description: Probe port for the Load Balancer
+    lb_rule_tcp_protocol:
+      type: string
+      required: true
+      description: TCP rule protocol for the Load Balancer
+    lb_rule_tcp_frontend_port:
+      type: string
+      required: true
+      description: TCP rule frontend port for the Load Balancer
+    lb_rule_tcp_backend_port:
+      type: string
+      required: true
+      description: TCP rule backend port for the Load Balancer
+    lb_rule_https_protocol:
+      type: string
+      required: true
+      description: HTTPS rule protocol for the Load Balancer
+    lb_rule_https_frontend_port:
+      type: string
+      required: true
+      description: HTTPS frontend port for the Load Balancer
 
 jobs:
   deploy-lb:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Login to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Deploy Load Balancer
-        if: inputs.action == 'create'
-        run: |
-          az network lb create --resource-group ${{ inputs.resource-group }} \
-            --name ${{ inputs.lb-name }} --location "${{ inputs.location }}" \
-            --frontend-ip-name ${{ inputs.frontend-ip }}
-
-      - name: Remove Load Balancer
-        if: inputs.action == 'remove'
-        run: |
-          az network lb delete --resource-group ${{ inputs.resource-group }} \
-            --name ${{ inputs.lb-name }}
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Deploy Load Balancer
+      if: inputs.action == 'create'
+      run: |
+        az network lb create --resource-group ${{ inputs.resource-group }} \
+          --name ${{ inputs.lb-name }} --location "${{ inputs.location }}" \
+          --frontend-ip-name ${{ inputs.frontend-ip }}
+    - name: Remove Load Balancer
+      if: inputs.action == 'remove'
+      run: |
+        az network lb delete --resource-group ${{ inputs.resource-group }} \
+          --name ${{ inputs.lb-name }}
