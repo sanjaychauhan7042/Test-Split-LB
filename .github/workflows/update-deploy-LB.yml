@@ -54,51 +54,7 @@ on:
           - Standard
           - Basic
         default: 'Standard'
-      purpose:
-        type: string
-        required: true
-        description: 'Purpose of the Load Balancer'
-      subnetname:
-        type: string
-        required: true
-        description: 'Subnet name for Load Balancer'
-      private_ip:
-        type: string
-        required: false
-        description: 'Private IP address for Load Balancer frontend configuration'
-      nic_names:
-        description: 'Comma-separated list of NIC names'
-        required: true
-        default: 'nic1,nic2,nic3'
-      lb_probe_protocol:
-        type: string
-        required: true
-        description: 'Probe protocol for the Load Balancer'
-      lb_probe_port:
-        type: string
-        required: true
-        description: 'Probe port for the Load Balancer'
-      tcp_rule_protocol:
-        type: string
-        required: true
-        description: 'TCP rule protocol for the Load Balancer'
-      tcp_rule_frontend_port:
-        type: string
-        required: true
-        description: 'TCP rule frontend port for the Load Balancer'
-      tcp_rule_backend_port:
-        type: string
-        required: true
-        description: 'TCP rule backend port for the Load Balancer'
-      https_rule_protocol:
-        type: string
-        required: true
-        description: 'HTTPS rule protocol for the Load Balancer'
-      https_rule_frontend_port:
-        type: string
-        required: true
-        description: 'HTTPS frontend port for the Load Balancer'
-
+      
 jobs:
   deploy-lb:
     runs-on: ubuntu-latest
