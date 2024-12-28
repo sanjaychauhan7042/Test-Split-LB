@@ -1,0 +1,89 @@
+name: Create and Remove Load Balancer
+on: 
+  workflow_dispatch:
+    inputs:
+      projectname:
+        description: 'Name of the project'
+        type: string
+        required: true
+      action:
+        description: 'Create or Remove the Load Balancer'
+        type: choice
+        required: true
+        default: 'create'
+        options:
+          - create
+          - remove
+      requesttype:
+        type: choice
+        required: true
+        description: 'Request Type'
+        options:
+          - Create with New RG
+          - Create with Existing RG
+          - Remove
+        default: 'Create with New RG'
+      environment:
+        type: choice
+        required: true
+        description: 'Environment'
+        options:
+          - DEV
+          - UAT
+          - QA
+          - PROD
+      resource_group:
+        description: 'Azure Resource Group'
+        type: string
+        required: true
+      location:
+        type: choice
+        required: true
+        description: 'Deployment Location'
+        options:
+          - eastus2
+          - uksouth
+          - centralus
+          - ukwest
+      lb_name:
+        description: 'Load Balancer Name'
+        type: string
+        required: true
+      frontend_ip:
+        description: 'Frontend IP Configuration Name'
+        type: string
+        required: true
+      sku_name:
+        type: choice
+        required: false
+        description: 'SKU for Load Balancer'
+        options:
+          - Standard
+          - Basic
+        default: 'Standard'
+      
+jobs:
+  deploy-lb:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          client-id: ${{secrets.AZURE_CLIENT_ID}}
+          client-secret: ${{secrets.AZURE_CLIENT_SECRET}}
+          subscription-id: ${{secrets.AZURE_SUBSCRIPTION_ID}}
+          tenant-id: ${{secrets.AZURE_TENANT_ID}}
+      - name: Deploy Load Balancer
+        if: ${{ inputs.action == 'create' }}
+        run: |
+          az network lb create --resource-group ${{ inputs.resource_group }} \
+            --name ${{ inputs.lb_name }} --location "${{ inputs.location }}" \
+            --frontend-ip-name ${{ inputs.frontend_ip }}
+      - name: Remove Load Balancer
+        if: ${{ inputs.action == 'remove' }}
+        run: |
+          az network lb delete --resource-group ${{ inputs.resource_group }} \
+            --name ${{ inputs.lb_name }}
+
